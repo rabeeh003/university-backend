@@ -6,13 +6,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import status
+from django.http import JsonResponse
+from datetime import datetime, timedelta
 
 class AdminLoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
         user = authenticate(username=username, password=password)
-
+        
         if user is not None and user.is_superuser:
             refresh = RefreshToken.for_user(user)
             data = {
@@ -20,7 +22,13 @@ class AdminLoginView(APIView):
                 'access': str(refresh.access_token),
                 'user': user.id
             }
-            return Response(data, status=status.HTTP_200_OK)
+            print("*************")
+            print(data['access'])
+            print("*************")
+            response = JsonResponse(data, status=status.HTTP_200_OK)
+            expiration_time = datetime.utcnow() + timedelta(days=1)  # Set expiration to 1 day
+            response.set_cookie(key='admin', value=data['access'], expires=expiration_time)
+            return response
         return Response({'detail': 'Invalid credentials or not a superuser'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
