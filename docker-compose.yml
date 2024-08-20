@@ -18,7 +18,7 @@ services:
     volumes:
       - .:/app
     ports:
-      - "${PORT}:${PORT}"
+      - "8000:8000"  # Fixed port binding
     depends_on:
       - db
     environment:
