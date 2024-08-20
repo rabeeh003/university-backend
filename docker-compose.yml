@@ -14,14 +14,15 @@ services:
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:${PORT}
     volumes:
       - .:/app
     ports:
-      - "8000:8000"  # Fixed port binding
+      - "${PORT}:${PORT}"
     depends_on:
       - db
     environment:
+      PORT: 8000,
       DEBUG: 'True'
       DB_NAME: 'postgres'
       DB_USER: 'postgres'
