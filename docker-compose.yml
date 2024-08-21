@@ -14,11 +14,11 @@ services:
 
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:${PORT}
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
-      - "${PORT}:${PORT}"
+      - "8000:8000"  # Fixed port binding
     depends_on:
       - db
     environment:
