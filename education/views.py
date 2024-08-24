@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAuthenticated # type: ignore
 from .models import Course, Department, Semester, Subject, Silabus
 from .serializers import CourseSerializer, DepartmentSerializer, SemesterSerializer, SubjectSerializer, SilabusSerializer
 
+
+
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer

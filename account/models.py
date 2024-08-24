@@ -4,14 +4,14 @@ from education.models import Semester, Course, Department
 
 class College(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    profile = models.ImageField(upload_to='profiles/')
+    profile = models.ImageField(upload_to='profiles/', null=True, blank=True, default='profiles/default.png')
     place = models.CharField(max_length=100)
     phone = models.CharField(max_length=15)
     district = models.CharField(max_length=100)
     panchayath = models.CharField(max_length=100)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    description = models.TextField()
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

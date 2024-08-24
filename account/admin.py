@@ -7,7 +7,9 @@ class CollegeAdmin(admin.ModelAdmin):
     search_fields = ('place', 'district', 'principal', 'user')
     list_filter = ('district',)
     def profile_image_tag(self, obj):
-        return format_html('<img src="{}" style="max-width: 50px; max-height: 50px;" />'.format(obj.profile.url))
+        if obj.profile:
+            return format_html('<img src="{}" style="max-width: 50px; max-height: 50px;" />'.format(obj.profile.url))
+        return format_html('<p>No Image</p>')
     profile_image_tag.short_description = 'Profile Image'
 
 class StudentAdmin(admin.ModelAdmin):
@@ -15,7 +17,9 @@ class StudentAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'parent_name', 'place', 'district')
     list_filter = ('college', 'batch', 'district','status')
     def profile_image_tag(self, obj):
-        return format_html('<img src="{}" style="max-width: 50px; max-height: 50px;" />'.format(obj.profile.url))
+        if obj.profile:
+            return format_html('<img src="{}" style="max-width: 50px; max-height: 50px;" />'.format(obj.profile))
+        return format_html('<p>No Image</p>')
     profile_image_tag.short_description = 'Profile Image'
 
 class TeacherAdmin(admin.ModelAdmin):
@@ -23,7 +27,9 @@ class TeacherAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'degree', 'college__place')
     list_filter = ('college','is_principal','is_active',)
     def profile_image_tag(self, obj):
-        return format_html('<img src="{}" style="max-width: 50px; max-height: 50px;" />'.format(obj.profile.url))
+        if obj.profile:
+            return format_html('<img src="{}" style="max-width: 50px; max-height: 50px;" />'.format(obj.profile))
+        return format_html('<p>No Image</p>')
     profile_image_tag.short_description = 'Profile Image'
 
 

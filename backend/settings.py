@@ -16,7 +16,7 @@ SECRET_KEY = 'django-insecure-6jyx7z&vs!zr1*7%!04z*ua7bwqz$@mx5d)l0x*yn8$xr6q0h!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [".onrender.com"]
+ALLOWED_HOSTS = [".onrender.com","localhost","127.0.0.1"]
 # Cors
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -58,6 +58,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 20
 }
 
 TEMPLATES = [
