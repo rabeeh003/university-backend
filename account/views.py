@@ -12,27 +12,21 @@ from datetime import datetime, timedelta
 from .serializers import UserSerializer, CollegeSerializer
 from .models import College
 
-class AdminLoginView(APIView):
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(username=username, password=password)
+# common view for all users
+
+class LogoutView(APIView):
+    def post(self, request, *args, **kwargs):
+        user_type = request.data.get('user_type')
         
-        if user is not None and user.is_superuser:
-            refresh = RefreshToken.for_user(user)
-            data = {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user': user.id
-            }
-            print("*************")
-            print(data['access'])
-            print("*************")
-            response = JsonResponse(data, status=status.HTTP_200_OK)
-            expiration_time = datetime.utcnow() + timedelta(days=15)
-            response.set_cookie(key='admin', value=data['access'], expires=expiration_time)
-            return response
-        return Response({'detail': 'Invalid credentials or not a superuser'}, status=status.HTTP_401_UNAUTHORIZED)
+        if user_type not in ['admin', 'student', 'teacher', 'college']:
+            return JsonResponse({'detail': 'Invalid user type'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        cookie_name = user_type
+        response = JsonResponse({'detail': 'Successfully logged out'}, status=status.HTTP_200_OK)
+        response.delete_cookie(cookie_name)
+        return response
+
+# admin views
 
 class VerifyTokenView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -49,7 +43,29 @@ class VerifyTokenView(APIView):
             }
             return Response(data, status=status.HTTP_200_OK)
         else:
-            return Response({'detail': 'Not a superuser'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'detail': 'Not a adminuser'}, status=status.HTTP_403_FORBIDDEN)
+
+
+class AdminLoginView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        
+        if user is not None and user.is_superuser:
+            refresh = RefreshToken.for_user(user)
+            data = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': user.id,
+                'user_type': 'admin'
+            }
+            response = JsonResponse(data, status=status.HTTP_200_OK)
+            expiration_time = datetime.utcnow() + timedelta(days=15)
+            response.set_cookie(key='admin', value=data['access'], expires=expiration_time)
+            return response
+        return Response({'detail': 'Invalid credentials or not a superuser'}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 # start college views code.
 
@@ -61,9 +77,8 @@ class CollegeRegisterView(generics.CreateAPIView):
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
 
-        # Create College instance
         college_data = {
-            "user": user.id,  # This should be a User instance, not an ID
+            "user": user.id,  
             "place": request.data.get("place"),
             "phone": request.data.get("phone"),
             "district": request.data.get("district"),
@@ -89,3 +104,41 @@ class CollegeView(generics.ListAPIView):
     queryset = College.objects.all()
     serializer_class = CollegeSerializer
     queryset = College.objects.all()
+    
+class CollegeLoginView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        
+        if user is not None and not user.is_superuser and user.is_staff and user.is_active:
+            refresh = RefreshToken.for_user(user)
+            data = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': user.id,
+                'user_type': 'college'
+            }
+            response = JsonResponse(data, status=status.HTTP_200_OK)
+            expiration_time = datetime.utcnow() + timedelta(days=15)
+            response.set_cookie(key='college', value=data['access'], expires=expiration_time)
+            return response
+        return Response({'detail': 'Invalid credentials or check inputs and login page.'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+class VerifyTokenCollegeView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.is_staff:
+            data = {
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Not a college.'}, status=status.HTTP_403_FORBIDDEN)
+
